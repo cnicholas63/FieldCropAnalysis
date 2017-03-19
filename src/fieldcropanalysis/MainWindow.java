@@ -1,6 +1,6 @@
 /*
  * @author Chris Nicholas Student Number 22489355
- * 
+ * Hello Tesing GIT
  * 
  */
 package fieldcropanalysis;
@@ -898,10 +898,11 @@ public class MainWindow extends javax.swing.JFrame {
                             .addComponent(lblCursorOutLat))
                         .addGap(15, 15, 15))
                     .addGroup(jpnlControlsLayout.createSequentialGroup()
-                        .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(chkBlur)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblInRange, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblInRange, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(chkBlur)
+                                .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGap(166, 166, 166))))
         );
 
