@@ -1,11 +1,14 @@
 /*
  * Author: Chris Nicholas
- * FieldCropAnalysis provides methods for analysing a crop
+ * FieldCropAnalysis provides methods for helping analysis of a crop
+ * Includes:
+ *      Neural network classifier
+ *      Content aware smoothing algorithm
  */
 
 package fieldcropanalysis;
+
 // Neuroph Dependencies
-//import org.neuroph.contrib.imgrec.image.Color;
 import org.neuroph.core.NeuralNetwork;
 import org.neuroph.core.learning.SupervisedTrainingElement;
 import org.neuroph.core.learning.TrainingSet;
@@ -28,6 +31,13 @@ public class FieldCropAnalysis {
         
     }
     
+    /**
+     * Runs image through neral network classification and colours output according
+     * to classification results
+     * @param image The image to be classified
+     * @param hsb   true = perform HSB classification, false = use RGB classification
+     * @return      BufferedImage containing resultant classified image
+     */
     public BufferedImage neuralNet(BufferedImage image, boolean hsb) {
         NeuralNetwork network = NeuralNetwork.load("NNFieldClassifierHSB.net");
         int rgb; // Represents RGB from scanned pixel
@@ -43,13 +53,15 @@ public class FieldCropAnalysis {
         for (int y = 0; y < image.getHeight(); y++) {
             for (int x = 0; x < image.getWidth(); x++) {
                 rgb = image.getRGB(x, y); // Get pixel colour
-
+                
                 Color color = new Color(rgb);
                 
                 // Split pixel colour into composit values;
                 int red = color.getRed();
                 int green = color.getGreen();
                 int blue = color.getBlue();
+                
+//                if(red == green && red == blue) continue; // Ignore masked pixels
                 
                 // Normalise data between 0 and 1, we know that RGB colours are in the range 0 - 255
                 // so we can just divide the value by 255 - no need for min/max business
@@ -84,6 +96,14 @@ public class FieldCropAnalysis {
         return image;
     }
     
+    /**
+     * regionAware performs aggressive smoothing - thus content aware-  in 5 pixel radius 
+     * around pixel being sampled. This is to be used in conjunction with neuralNet classified image.
+     * The sampled pixel is coloured according to the most used colour in the surrounding area
+     * this is the most used colour Not an average.
+     * @param orgImage BufferedImage to be sampled
+     * @return BufferedImage containing smoothed results.
+     */
     BufferedImage regionAware(BufferedImage orgImage) {
         int rgb; // Represents RGB from scanned pixel
         float[] pixelProperties = {0.0f, 0.0f, 0.0f}; // Holds pixel properties RGB or HSB
@@ -102,9 +122,6 @@ public class FieldCropAnalysis {
         
         newField = new BufferedImage(width, height, imageType); // Cretae new image
         
-        // orgImage = neuralNet(orgImage, true); // USe HSB network
-
-
         // Scan through image file 
         for (int y = 0; y < height; y++) {            
             for (int x = 0; x < width; x++) {
