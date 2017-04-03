@@ -102,22 +102,13 @@ public class FieldCropAnalysis {
         
         newField = new BufferedImage(width, height, imageType); // Cretae new image
         
-        orgImage = neuralNet(orgImage, true); // USe HSB network
+        // orgImage = neuralNet(orgImage, true); // USe HSB network
 
 
         // Scan through image file 
-        for (int y = 0; y < height; y++) {
+        for (int y = 0; y < height; y++) {            
             for (int x = 0; x < width; x++) {
                 int[] bin = new int[3]; // Three bins for counting classifications
-                
-                rgb = orgImage.getRGB(x, y); // Get pixel colour
-
-                Color color = new Color(rgb);
-                
-                // Split pixel colour into composit values;
-                int red = color.getRed();
-                int green = color.getGreen();
-                int blue = color.getBlue();
                 
                 for(int innerY = y - 5; innerY < y + 5; innerY++) {
                     
@@ -128,12 +119,20 @@ public class FieldCropAnalysis {
                         break; 
                     
                     // find the most popular classification in the region
-                    for(int innerX = x - 5; innerX < width; innerX++) {
+                    for(int innerX = x - 5; innerX < x + 5; innerX++) {
                         // Keep innerX in bounds
                         if(innerX < 0) 
                             innerX = 0;
                         else if(innerX >= width)
                             break;
+                        
+                        rgb = orgImage.getRGB(innerX, innerY); // Get pixel colour
+                        Color color = new Color(rgb);
+                
+                        // Split pixel colour into composit values;
+                        int red = color.getRed();
+                        int green = color.getGreen();
+                        int blue = color.getBlue();
                         
                         // Total bins
                         if(red == 255) // pixel classified as soil
@@ -141,7 +140,7 @@ public class FieldCropAnalysis {
                         else if(green == 255)
                             bin[1]++;
                         else
-                            bin[2]++; 
+                            bin[2]++;                        
                     }
                 }
                 
@@ -154,7 +153,7 @@ public class FieldCropAnalysis {
                     classification = 1;
                 else 
                     classification = 2;
-               
+                
                 newField.setRGB(x, y, classColours[classification]); // Apply artificial colour to pixel according to its classification
             }
         }

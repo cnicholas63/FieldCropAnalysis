@@ -38,6 +38,7 @@ public class MainWindow extends javax.swing.JFrame {
     boolean maskInvert; // Should the mask be inverted 
     boolean applyBlur; // Should the image have blur applied
     boolean applyNN;   // Should image be classified using NN
+    boolean applyClassSmooth; // SHould the classification smoothing be applied
     JLabel pixelsInRange;
     Boolean onlyWithinBoundary;
 
@@ -67,7 +68,9 @@ public class MainWindow extends javax.swing.JFrame {
         maskInvert = false; // Invert Mask checkbox not set
         applyBlur = false;  // Blur not applied by default
         applyNN = false;     // Neural Network not applied
+        applyClassSmooth = false; // Classification smoothing not applied
         onlyWithinBoundary = true; // Only sample pixels within boundary
+        
 
         // Field information files - this should be done using file picker
         String rs = "Field_Rising_Sun_10.csv";
@@ -589,6 +592,8 @@ public class MainWindow extends javax.swing.JFrame {
         chkInvertMask.setEnabled(!applyNN);
         chkMaskPixels.setEnabled(!applyNN);
         
+        chkClassSmooth.setEnabled(applyNN); // Only enabled if applyNN = true
+        
         sldrStartColour.setEnabled(!applyNN);
         sldrEndColour.setEnabled(!applyNN);
         
@@ -599,13 +604,28 @@ public class MainWindow extends javax.swing.JFrame {
             
             // Redraw image
             displayImage(imageOriginX, imageOriginY);
-        } else { // Restore original image
+        } else { // Restore original image and state
             workImage = copyImage(workImageState); // Restore work image
             // Redraw image
             displayImage(imageOriginX, imageOriginY);
+           
+            chkClassSmooth.setSelected(false); // Uncheck class smoothing check box
+            applyClassSmooth = false;
+            
         }
-       
+    }
+    
+    
+    // Apply agressive smoothing based on classification of surrounding pixels - within 5 pixel readius
+    private void checkApplyClassSmoothingStateChanged(java.awt.event.ItemEvent evt) {
+        applyClassSmooth = !applyClassSmooth; // Toggle smoothing flag 
         
+        if(applyClassSmooth) {
+            workImage = fieldCropAnalysis.regionAware(workImage);           
+            
+            displayImage(imageOriginX, imageOriginY);
+            System.out.println("Image displayed");
+        }
     }
     
     
@@ -686,6 +706,7 @@ public class MainWindow extends javax.swing.JFrame {
         pnlCursorColour = new javax.swing.JPanel();
         chkApplyNN = new javax.swing.JCheckBox();
         jLabel2 = new javax.swing.JLabel();
+        chkClassSmooth = new javax.swing.JCheckBox();
         jlblMainImage = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -863,6 +884,15 @@ public class MainWindow extends javax.swing.JFrame {
 
         jLabel2.setText("This will take a few seconds, please be patient.");
 
+        chkClassSmooth.setText("Classification Smoothing");
+        chkClassSmooth.setToolTipText("Applies strong smoothing to classified image");
+        chkClassSmooth.setEnabled(false);
+        chkClassSmooth.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkClassSmoothItemStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout jpnlControlsLayout = new javax.swing.GroupLayout(jpnlControls);
         jpnlControls.setLayout(jpnlControlsLayout);
         jpnlControlsLayout.setHorizontalGroup(
@@ -913,20 +943,17 @@ public class MainWindow extends javax.swing.JFrame {
                     .addGroup(jpnlControlsLayout.createSequentialGroup()
                         .addGap(55, 55, 55)
                         .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkBlur)
+                            .addComponent(chkMaskPixels)
+                            .addComponent(chkInvertMask))
+                        .addGap(12, 12, 12)
+                        .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(chkClassSmooth)
                             .addGroup(jpnlControlsLayout.createSequentialGroup()
-                                .addComponent(chkInvertMask)
-                                .addGap(48, 48, 48))
-                            .addGroup(jpnlControlsLayout.createSequentialGroup()
-                                .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(chkBlur)
-                                    .addComponent(chkMaskPixels))
-                                .addGap(52, 52, 52)
-                                .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jpnlControlsLayout.createSequentialGroup()
-                                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(77, 77, 77)
-                                        .addComponent(lblInRange, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(chkApplyNN, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(77, 77, 77)
+                                .addComponent(lblInRange, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(chkApplyNN, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addContainerGap(184, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jpnlControlsLayout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -961,7 +988,9 @@ public class MainWindow extends javax.swing.JFrame {
                                         .addComponent(pnlCursorColour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addGap(18, 18, 18)))
                                 .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(chkInvertMask)
+                                    .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(chkInvertMask)
+                                        .addComponent(chkClassSmooth))
                                     .addComponent(sldrEndColour, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(lblEndColour, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(pnlEndColour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1100,6 +1129,10 @@ public class MainWindow extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_chkApplyNNActionPerformed
 
+    private void chkClassSmoothItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkClassSmoothItemStateChanged
+        checkApplyClassSmoothingStateChanged(evt);
+    }//GEN-LAST:event_chkClassSmoothItemStateChanged
+
     /**
      * @param args the command line arguments
      */
@@ -1138,6 +1171,7 @@ public class MainWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox chkApplyNN;
     private javax.swing.JCheckBox chkBlur;
+    private javax.swing.JCheckBox chkClassSmooth;
     private javax.swing.JCheckBox chkInvertMask;
     private javax.swing.JCheckBox chkMaskPixels;
     private javax.swing.JLabel jLabel1;

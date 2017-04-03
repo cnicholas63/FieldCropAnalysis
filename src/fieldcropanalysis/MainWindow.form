@@ -117,25 +117,19 @@
                       <Group type="102" attributes="0">
                           <EmptySpace min="-2" pref="55" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="chkBlur" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="chkMaskPixels" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="chkInvertMask" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="chkClassSmooth" min="-2" max="-2" attributes="0"/>
                               <Group type="102" attributes="0">
-                                  <Component id="chkInvertMask" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="48" pref="48" max="-2" attributes="0"/>
+                                  <Component id="jLabel1" min="-2" pref="97" max="-2" attributes="0"/>
+                                  <EmptySpace min="-2" pref="77" max="-2" attributes="0"/>
+                                  <Component id="lblInRange" min="-2" pref="61" max="-2" attributes="0"/>
                               </Group>
-                              <Group type="102" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="chkBlur" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="chkMaskPixels" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace min="-2" pref="52" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Group type="102" attributes="0">
-                                          <Component id="jLabel1" min="-2" pref="97" max="-2" attributes="0"/>
-                                          <EmptySpace min="-2" pref="77" max="-2" attributes="0"/>
-                                          <Component id="lblInRange" min="-2" pref="61" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Component id="chkApplyNN" alignment="0" min="-2" pref="187" max="-2" attributes="0"/>
-                                  </Group>
-                              </Group>
+                              <Component id="chkApplyNN" alignment="0" min="-2" pref="187" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace pref="184" max="32767" attributes="0"/>
                       </Group>
@@ -182,7 +176,10 @@
                                       </Group>
                                   </Group>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="chkInvertMask" min="-2" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="3" attributes="0">
+                                          <Component id="chkInvertMask" alignment="3" min="-2" max="-2" attributes="0"/>
+                                          <Component id="chkClassSmooth" alignment="3" min="-2" max="-2" attributes="0"/>
+                                      </Group>
                                       <Component id="sldrEndColour" min="-2" pref="30" max="-2" attributes="0"/>
                                       <Component id="lblEndColour" min="-2" pref="26" max="-2" attributes="0"/>
                                       <Component id="pnlEndColour" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -448,6 +445,16 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="This will take a few seconds, please be patient."/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="chkClassSmooth">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Classification Smoothing"/>
+            <Property name="toolTipText" type="java.lang.String" value="Applies strong smoothing to classified image"/>
+            <Property name="enabled" type="boolean" value="false"/>
+          </Properties>
+          <Events>
+            <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="chkClassSmoothItemStateChanged"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
