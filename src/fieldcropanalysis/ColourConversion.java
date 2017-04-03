@@ -267,24 +267,24 @@ public class ColourConversion extends Component {
 //        g.drawImage(trainingImage, 0, 0, null);
 //    }
 
-    public static void main(String[] args) {
-        JFrame f = new JFrame("Load Image Sample");
-
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        f.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                System.exit(0);
-            }
-        });
-
-        ColourConversion colourConv = new ColourConversion(); // Instantiate new computer art
-
-        f.add(colourConv);
-
-        f.pack();
-        f.setVisible(true);
-
-    }
+//    public static void main(String[] args) {
+//        JFrame f = new JFrame("Load Image Sample");
+//
+//        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//
+//        f.addWindowListener(new WindowAdapter() {
+//            public void windowClosing(WindowEvent e) {
+//                System.exit(0);
+//            }
+//        });
+//
+//        ColourConversion colourConv = new ColourConversion(); // Instantiate new computer art
+//
+//        f.add(colourConv);
+//
+//        f.pack();
+//        f.setVisible(true);
+//
+//    }
 
 }

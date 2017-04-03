@@ -1,6 +1,7 @@
 /*
  * @author Chris Nicholas Student Number 22489355
- * Hello Tesing GIT
+ * Main window, sets up the main window and provides core logic
+ * for the application
  * 
  */
 package fieldcropanalysis;
@@ -27,49 +28,53 @@ public class MainWindow extends javax.swing.JFrame {
 
     int mouseStartX, mouseStartY, mouseEndX, mouseEndY; // Mouse locations
     int imageOriginX, imageOriginY; // records the top left co-ordinates of image
-    BufferedImage originalImage; // Buffered image holding original image
-    BufferedImage blurredImage; // Buffered image holding blurred copy
-    BufferedImage workImage;    // Buffered image holding image that is worked and displayed
+    BufferedImage originalImage;    // Buffered image holding original image
+    BufferedImage blurredImage;     // Buffered image holding blurred copy
+    BufferedImage workImage;        // Buffered image holding image that is worked and displayed
+    BufferedImage workImageState;   // Buffered image used to dave work image state then NN applied
     BufferedImage referenceImage; // Buffered image for main image (copy of original)
     int[] hues; // Array for holding hue analysis
     boolean maskSet; // Is the mask check box set flag
     boolean maskInvert; // Should the mask be inverted 
     boolean applyBlur; // Should the image have blur applied
+    boolean applyNN;   // Should image be classified using NN
     JLabel pixelsInRange;
     Boolean onlyWithinBoundary;
 
-    FieldInfo field; // Field info object
+    FieldInfo field; // Field information object
+    FieldCropAnalysis fieldCropAnalysis; // Field Crop Analysis provides NN classification routines
 
     /**
      * Creates new form MainWindow
      */
     public MainWindow() {
         initComponents();
-        
-        
 
         hues = new int[360]; // Enough space for 360 hues 0 - 360 degrees (360 & 0 occupying same space)
 
+        // Initialise GUI elements and status
         // Initialise sliders
         startSlider = new Slider(sldrStartColour, lblStartValue, pnlStartColour); // Instantiate startSlider
         endSlider = new Slider(sldrEndColour, lblEndValue, pnlEndColour); // Instantiate endSlider
 
-        pixelsInRange = lblInRange;
-        displayColourPalette();
+        pixelsInRange = lblInRange; 
+        displayColourPalette(); // Display HSB colour palette
 
         imageOriginX = 0; // Initialiase the image origin to top left (0, 0)
         imageOriginY = 0;
 
-        maskSet = false; // Mask checkbox not set
-        maskInvert = false; // Invert Maske checkbox not set
-        applyBlur = false; // Blur not applied by default
+        maskSet = false;    // Mask checkbox not set
+        maskInvert = false; // Invert Mask checkbox not set
+        applyBlur = false;  // Blur not applied by default
+        applyNN = false;     // Neural Network not applied
         onlyWithinBoundary = true; // Only sample pixels within boundary
 
+        // Field information files - this should be done using file picker
         String rs = "Field_Rising_Sun_10.csv";
         String tl = "Field_Thornton_Lodge_14_Acre.csv";
         String os = "Field_Ormskirk_Sewn.csv";
 
-        field = new FieldInfo(rs); // Instantiate new field loading image and coordinates        
+        field = new FieldInfo(rs); // Instantiate new field loading image and GPS coordinates        
 
         originalImage = field.getFieldImage();   // Get the original field image
         blurredImage = copyImage(originalImage); // Make a copy of the original image for blurring
@@ -80,9 +85,13 @@ public class MainWindow extends javax.swing.JFrame {
         blurImage(blurredImage, originalImage); // Apply blur to blurredImage
         //blurImage(blurredImage, blurredImage);
 
-        colourAudit(onlyWithinBoundary); // Audit the HSB composition of the image
-        colourAnalysis();
+        colourAudit(onlyWithinBoundary); // Audit the HSB composition of the image within field boundary
+        colourAnalysis(); 
+        
+        fieldCropAnalysis = new FieldCropAnalysis();
 
+        // workImage = fieldCropAnalysis.neuralNet(workImage, true); // true = Apply HSB Evaluation        
+        // workImage = fieldCropAnalysis.regionAware(workImage);
         
 //        Graphics2D g = workImage.createGraphics();
 //        Graphics h = jlblMainImage.getGraphics();
@@ -97,10 +106,6 @@ public class MainWindow extends javax.swing.JFrame {
 //        g.dispose();
         
         displayImage(imageOriginX, imageOriginY); // Display the main image
-
-        
-        
-
     }
 
     /**
@@ -146,7 +151,6 @@ public class MainWindow extends javax.swing.JFrame {
                     hue %= 360; // Make sure 360 == 0
                     hues[hue]++; // Increment hue counter
                 }
-
             }
         }
     }
@@ -264,16 +268,20 @@ public class MainWindow extends javax.swing.JFrame {
         jlblColourPalette.setIcon(new ImageIcon(colourPalette));
     }
 
-    // Applies coloured mask to the image
+    /**
+     * Applies mask to the image, masking pixels outside selected colour range
+     * @param boolean mask, true mask on, false mask off
+     **/
     private void maskImage(boolean mask) {
         float[] hsb;
         int start, end; // Start and end slider values
+        int maskColour = new Color(150, 150, 150).getRGB(); // Mask colour
+        
 
         start = startSlider.getValue(); // Get start value
         end = endSlider.getValue(); // Get end value
 
         if (mask) { // Mask the pixels in the main image
-
             for (int y = 0; y < referenceImage.getHeight(); y++) {
                 for (int x = 0; x < referenceImage.getWidth(); x++) {
                     int hue;
@@ -292,25 +300,18 @@ public class MainWindow extends javax.swing.JFrame {
                     if (!maskInvert) { // Normal mask
                         if (start < end) {
                             if (hue < start || hue > end) { // If pixel colour outside specified range mask it
-                                col = new Color(150, 150, 150).getRGB(); // Mask pixels with mid grey
+                                col = maskColour; // Mask pixels with mid grey
                             }
                         }
-//                        else {
-//                            if (hue >= start || hue <= end) { // If pixel colour inside specified range mask it
-//                                col = new Color(150, 150, 150).getRGB(); // Mask pixels with mid grey
-//                            }                            
-//                        }
+
                     } else // Invert mask
                     {
                         if (start < end) { // Normal look for values outside range
                             if (hue >= start && hue <= end) { // If pixel colour inside specified range mask it
-                                col = new Color(150, 150, 150).getRGB(); // Mask pixels with mid grey
+                                col = maskColour; // Mask pixels with mid grey
                             }
-                        } //                        else { // Inverse, look for values going from start -> 360 -> end
-                    }                    //                            if (hue < start && hue > end) { // If pixel colour outside specified range mask it
-                    //                                col = new Color(150, 150, 150).getRGB(); // Mask pixels with mid grey
-                    //                            }
-                    //                        }
+                        } 
+                    }
 
                     workImage.setRGB(x, y, col); // Set the pixel in work image
                 }
@@ -448,9 +449,10 @@ public class MainWindow extends javax.swing.JFrame {
 
     /**
      * ********************************
-     * My Event Handlers Called by NetBeans official event handlers This allows
-     * the addition and removal of GUI components without worrying about losing
-     * event handler code. *******************************
+     * Event Handlers Called by NetBeans official event handlers. 
+     * This allows the addition and removal of GUI components without 
+     * worrying about losing event handler code. 
+     * ********************************
      */
     // My handler for mouse moved over main image
     private void mainImageMouseMoved(java.awt.event.MouseEvent evt) {
@@ -497,13 +499,14 @@ public class MainWindow extends javax.swing.JFrame {
         lblCursorOutLong.setText(numberFormat.format(GPS.getY()));
     }
 
-    // Mouse clicked over main image
+    // Mouse clicked over main image 
     private void mainImageMouseClicked(java.awt.event.MouseEvent evt) {
         mouseStartX = evt.getX(); // Get the mouse X location at click
         mouseStartY = evt.getY(); // Get the mouse Y location at click
         System.out.println("Mouse Clicked: " + mouseStartX + ", " + mouseStartY);// TODO add your handling code here: 
     }
 
+    // Mouse dragged over main image
     private void mainImageMouseDragged(java.awt.event.MouseEvent evt) {
         // Mouse starting X and Y recorded in mousePressed
         int mouseX = evt.getX(); // Record current location of mouse
@@ -552,14 +555,16 @@ public class MainWindow extends javax.swing.JFrame {
         System.out.println("Blur = " + applyBlur);
     }
 
+    // Checkbox Invert Mask state changeed
     private void checkInvertMaskItemStateChanged(java.awt.event.ItemEvent evt) {
         maskInvert = !maskInvert; // Toggle maskInvert flag
 
-        if (maskSet) { // Only apply a mask if maskSet = true
+        if (maskSet) { // Only apply a mask if mask image selected (maskSet = true)
             maskImage(maskSet);
         }
     }
 
+    // Checkbox Mask Pixels state changed
     private void checkMaskPixelsItemStateChanged(java.awt.event.ItemEvent evt) {
         System.out.println("Box clicked");
         System.out.println("State = " + evt.getStateChange());
@@ -567,7 +572,43 @@ public class MainWindow extends javax.swing.JFrame {
         maskSet = !maskSet; // Toggle maskSet flag
 
         maskImage(maskSet); // Mask/demask pixels in image
+        
+        chkInvertMask.setEnabled(maskSet); // Only enable if mask is on
+        
     }
+    
+    // Checkbox Apply Neural Network state changed
+    private void checkApplyNNStateChanged(java.awt.event.ItemEvent evt) {
+        System.out.println("Box clicked");
+        System.out.println("State = " + evt.getStateChange());
+        
+        applyNN = !applyNN; 
+
+        // Toggle enabled flag other form controls
+        chkBlur.setEnabled(!applyNN); // Set to opposite of applyNN
+        chkInvertMask.setEnabled(!applyNN);
+        chkMaskPixels.setEnabled(!applyNN);
+        
+        sldrStartColour.setEnabled(!applyNN);
+        sldrEndColour.setEnabled(!applyNN);
+        
+        if(applyNN) { // This is a destructive process changing workImage data
+            workImageState = copyImage(workImage); // Backup the work image
+            
+            workImage = fieldCropAnalysis.neuralNet(workImage, true); // true = Apply HSB Evaluation   
+            
+            // Redraw image
+            displayImage(imageOriginX, imageOriginY);
+        } else { // Restore original image
+            workImage = copyImage(workImageState); // Restore work image
+            // Redraw image
+            displayImage(imageOriginX, imageOriginY);
+        }
+       
+        
+    }
+    
+    
 
     // End Slider mouse released handler
     private void sliderEndColourMouseReleased(java.awt.event.MouseEvent evt) {
@@ -576,6 +617,7 @@ public class MainWindow extends javax.swing.JFrame {
         }
     }
 
+    // End Slider mouse dragged
     private void sliderEndColourMouseDragged(java.awt.event.MouseEvent evt) {
         endSlider.updateStatus(); // Update the status of the slider to reflect changes
 
@@ -605,6 +647,9 @@ public class MainWindow extends javax.swing.JFrame {
 
         colourAnalysis(); // Analyse the colour profile for selected colour range
     }
+    
+
+    
 
     /**
      * This method is called from within the constructor to initialise the form.
@@ -626,7 +671,6 @@ public class MainWindow extends javax.swing.JFrame {
         pnlEndColour = new javax.swing.JPanel();
         jlblColourPalette = new javax.swing.JLabel();
         chkMaskPixels = new javax.swing.JCheckBox();
-        btnReset = new javax.swing.JButton();
         chkInvertMask = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
         lblInRange = new javax.swing.JLabel();
@@ -640,6 +684,8 @@ public class MainWindow extends javax.swing.JFrame {
         lblCursorLat = new javax.swing.JLabel();
         lblCursorOutLat = new javax.swing.JLabel();
         pnlCursorColour = new javax.swing.JPanel();
+        chkApplyNN = new javax.swing.JCheckBox();
+        jLabel2 = new javax.swing.JLabel();
         jlblMainImage = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -649,12 +695,18 @@ public class MainWindow extends javax.swing.JFrame {
             }
         });
 
+        jpnlControls.setForeground(new java.awt.Color(0, 255, 0));
+        jpnlControls.setToolTipText("Represents percentage of pixels within Start Hue to End Hue range");
+        jpnlControls.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        jpnlControls.setFocusable(false);
+        jpnlControls.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         jpnlControls.setMaximumSize(new java.awt.Dimension(1067, 200));
         jpnlControls.setMinimumSize(new java.awt.Dimension(1067, 200));
         jpnlControls.setName(""); // NOI18N
         jpnlControls.setPreferredSize(new java.awt.Dimension(1067, 200));
 
         sldrStartColour.setMaximum(359);
+        sldrStartColour.setToolTipText("");
         sldrStartColour.setPreferredSize(new java.awt.Dimension(360, 26));
         sldrStartColour.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             public void mouseDragged(java.awt.event.MouseEvent evt) {
@@ -720,15 +772,16 @@ public class MainWindow extends javax.swing.JFrame {
         jlblColourPalette.setText("jLabel1");
 
         chkMaskPixels.setText("Mask pixels outside range");
+        chkMaskPixels.setToolTipText("Hides pixels outside selected colour range behind grey mask");
         chkMaskPixels.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkMaskPixelsItemStateChanged(evt);
             }
         });
 
-        btnReset.setText("Reset");
-
         chkInvertMask.setText("Invert mask (mask pixels in range)");
+        chkInvertMask.setToolTipText("Inverts the mask effect, reveling what is under the mask");
+        chkInvertMask.setEnabled(false);
         chkInvertMask.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkInvertMaskItemStateChanged(evt);
@@ -747,6 +800,7 @@ public class MainWindow extends javax.swing.JFrame {
         lblInRange.setLabelFor(jLabel1);
 
         chkBlur.setText("Apply Smoothing");
+        chkBlur.setToolTipText("Smooths the image, so helps clear a little pixellation");
         chkBlur.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 chkBlurItemStateChanged(evt);
@@ -761,18 +815,22 @@ public class MainWindow extends javax.swing.JFrame {
         lblCursorX.setText("Cursor X:");
 
         lblCursorOutX.setText("jLabel2");
+        lblCursorOutX.setToolTipText("Pixel X location of mouse over image");
 
         lblCursorLong.setText("Cursor Long:");
 
         lblCursorY.setText("Cursor Y:");
 
         lblCursorOutY.setText("jLabel3");
+        lblCursorOutY.setToolTipText("Pixel Y location of mouse over image");
 
         lblCursorOutLong.setText("jLabel2");
+        lblCursorOutLong.setToolTipText("Longditude of mouse over image (Red indicates outside field boundary)");
 
         lblCursorLat.setText("Cursor Lat:");
 
         lblCursorOutLat.setText("jLabel2");
+        lblCursorOutLat.setToolTipText("Latitude of mouse over image (Red indicates outside field boundary)");
 
         pnlCursorColour.setBackground(new java.awt.Color(150, 150, 150));
         pnlCursorColour.setFocusable(false);
@@ -788,6 +846,22 @@ public class MainWindow extends javax.swing.JFrame {
             pnlCursorColourLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 30, Short.MAX_VALUE)
         );
+
+        chkApplyNN.setText("Classify with Neural Network:-");
+        chkApplyNN.setToolTipText("Applies a neural network classifier algorithm");
+        chkApplyNN.setName(""); // NOI18N
+        chkApplyNN.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                chkApplyNNItemStateChanged(evt);
+            }
+        });
+        chkApplyNN.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                chkApplyNNActionPerformed(evt);
+            }
+        });
+
+        jLabel2.setText("This will take a few seconds, please be patient.");
 
         javax.swing.GroupLayout jpnlControlsLayout = new javax.swing.GroupLayout(jpnlControls);
         jpnlControls.setLayout(jpnlControlsLayout);
@@ -835,23 +909,29 @@ public class MainWindow extends javax.swing.JFrame {
                     .addGroup(jpnlControlsLayout.createSequentialGroup()
                         .addGap(72, 72, 72)
                         .addComponent(jlblColourPalette, javax.swing.GroupLayout.PREFERRED_SIZE, 360, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(55, 55, 55)
                 .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jpnlControlsLayout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(btnReset)
-                        .addGap(19, 19, 19))
                     .addGroup(jpnlControlsLayout.createSequentialGroup()
+                        .addGap(55, 55, 55)
                         .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(chkInvertMask)
                             .addGroup(jpnlControlsLayout.createSequentialGroup()
-                                .addComponent(chkBlur)
-                                .addGap(96, 96, 96)
-                                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(77, 77, 77)
-                                .addComponent(lblInRange, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(chkMaskPixels))
-                        .addContainerGap(184, Short.MAX_VALUE))))
+                                .addComponent(chkInvertMask)
+                                .addGap(48, 48, 48))
+                            .addGroup(jpnlControlsLayout.createSequentialGroup()
+                                .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(chkBlur)
+                                    .addComponent(chkMaskPixels))
+                                .addGap(52, 52, 52)
+                                .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jpnlControlsLayout.createSequentialGroup()
+                                        .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(77, 77, 77)
+                                        .addComponent(lblInRange, javax.swing.GroupLayout.PREFERRED_SIZE, 61, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(chkApplyNN, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addContainerGap(184, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jpnlControlsLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(98, 98, 98))))
         );
         jpnlControlsLayout.setVerticalGroup(
             jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -868,7 +948,6 @@ public class MainWindow extends javax.swing.JFrame {
                         .addGap(18, 18, Short.MAX_VALUE)
                         .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(btnReset)
                                 .addComponent(lblCursorX)
                                 .addComponent(lblCursorOutX)
                                 .addComponent(lblCursorLong)
@@ -880,17 +959,21 @@ public class MainWindow extends javax.swing.JFrame {
                                         .addGap(12, 12, 12))
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jpnlControlsLayout.createSequentialGroup()
                                         .addComponent(pnlCursorColour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(18, 18, 18))
-                                    .addGroup(jpnlControlsLayout.createSequentialGroup()
-                                        .addComponent(chkMaskPixels)
-                                        .addGap(25, 25, 25)))
+                                        .addGap(18, 18, 18)))
                                 .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(chkInvertMask)
                                     .addComponent(sldrEndColour, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(lblEndColour, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(pnlEndColour, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(lblEndValue, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(36, 36, 36)))
+                                .addGap(36, 36, 36))
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jpnlControlsLayout.createSequentialGroup()
+                                .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(chkMaskPixels)
+                                    .addComponent(chkApplyNN))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                         .addGroup(jpnlControlsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(lblCursorY)
                             .addComponent(lblCursorOutY)
@@ -1009,6 +1092,14 @@ public class MainWindow extends javax.swing.JFrame {
         sliderStartColourMouseDragged(evt);
     }//GEN-LAST:event_sldrStartColourMouseDragged
 
+    private void chkApplyNNItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_chkApplyNNItemStateChanged
+        checkApplyNNStateChanged(evt);
+    }//GEN-LAST:event_chkApplyNNItemStateChanged
+
+    private void chkApplyNNActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_chkApplyNNActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_chkApplyNNActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -1045,11 +1136,12 @@ public class MainWindow extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnReset;
+    private javax.swing.JCheckBox chkApplyNN;
     private javax.swing.JCheckBox chkBlur;
     private javax.swing.JCheckBox chkInvertMask;
     private javax.swing.JCheckBox chkMaskPixels;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jlblColourPalette;
     private javax.swing.JLabel jlblMainImage;
     private javax.swing.JPanel jpnlControls;
