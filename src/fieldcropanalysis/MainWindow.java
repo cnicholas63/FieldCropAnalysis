@@ -91,23 +91,9 @@ public class MainWindow extends javax.swing.JFrame {
         colourAudit(onlyWithinBoundary); // Audit the HSB composition of the image within field boundary
         colourAnalysis(); 
         
-        fieldCropAnalysis = new FieldCropAnalysis();
+        // Instantiate FieldCropAnalysis providing access to Neural Net functionality
+        fieldCropAnalysis = new FieldCropAnalysis(); 
 
-        // workImage = fieldCropAnalysis.neuralNet(workImage, true); // true = Apply HSB Evaluation        
-        // workImage = fieldCropAnalysis.regionAware(workImage);
-        
-//        Graphics2D g = workImage.createGraphics();
-//        Graphics h = jlblMainImage.getGraphics();
-//        g.setColor(Color.WHITE);
-//        
-//        Rectangle rect = new Rectangle(0, 0, 50, 50);
-//        g.fillRect(10, 10, 50, 50);
-//        rect.translate(60, 100);
-//        
-//        
-//        g.draw(rect);
-//        g.dispose();
-        
         displayImage(imageOriginX, imageOriginY); // Display the main image
     }
 
@@ -124,7 +110,7 @@ public class MainWindow extends javax.swing.JFrame {
         Boolean samplePixel; // True = pixel should be sampled, False = not
         System.out.println("Colour Audit");
 
-        for (int t = 0; t < hues.length; t++) {
+        for (int t = 0; t < hues.length; t++) { // RE-initialise hue counts to 0
             hues[t] = 0;
         }
 
@@ -710,6 +696,7 @@ public class MainWindow extends javax.swing.JFrame {
         jlblMainImage = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Field Crop Analysis 22489355");
         addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
                 formComponentResized(evt);
@@ -1025,7 +1012,7 @@ public class MainWindow extends javax.swing.JFrame {
         jlblMainImage.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(150, 150, 150)));
         jlblMainImage.setMaximumSize(new java.awt.Dimension(1500, 600));
         jlblMainImage.setMinimumSize(new java.awt.Dimension(100, 100));
-        jlblMainImage.setName(""); // NOI18N
+        jlblMainImage.setName("Chris"); // NOI18N
         jlblMainImage.setPreferredSize(new java.awt.Dimension(1200, 600));
         jlblMainImage.setRequestFocusEnabled(false);
         jlblMainImage.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {

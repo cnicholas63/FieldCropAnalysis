@@ -287,7 +287,7 @@ public class FieldInfo {
             
             System.out.println("Image Name: " + imageName);
 
-            // REad in the file one line at a time and split into CSV values Latitude and Longitude            
+            // Read in the file one line at a time and split into CSV values Latitude and Longitude            
             while ((line = br.readLine()) != null) { // Read a single CSV line t
                 // use comma as separator
                 String[] coordCSV = line.split(cvsSplitBy); // Split the line into lat, long     
