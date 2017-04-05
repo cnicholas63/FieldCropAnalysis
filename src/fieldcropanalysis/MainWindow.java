@@ -610,6 +610,9 @@ public class MainWindow extends javax.swing.JFrame {
             workImage = fieldCropAnalysis.regionAware(workImage);           
             
             displayImage(imageOriginX, imageOriginY);
+            
+            chkClassSmooth.setEnabled(false);
+            
             System.out.println("Image displayed");
         }
     }
