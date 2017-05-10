@@ -58,10 +58,22 @@ public class FieldInfo {
         
         
         // Plot a registration point on the field at each field boundary GPS
-        for (int t = 0; t < fieldBoundary.size(); t++) {
-            plotPoint(fieldBoundary.get(t), Color.WHITE.getRGB());
-        }
+        plotBoundary();
 
+    }
+    
+    // Plot boundary points over image
+    void plotBoundary() {
+        for (int t = 0; t < fieldBoundary.size(); t++) {
+            plotPoint(fieldImage, fieldBoundary.get(t), Color.WHITE.getRGB());
+        }
+    }
+    
+    
+    public void plotBoundary(BufferedImage image) {
+        for (int t = 0; t < fieldBoundary.size(); t++) {
+            plotPoint(image, fieldBoundary.get(t), Color.WHITE.getRGB());
+        }
     }
 
     // Calculate the image scale
@@ -74,7 +86,7 @@ public class FieldInfo {
     }
 
     // Plot point at specified GPS location
-    private void plotPoint(Point2D.Double point, int colour) {
+    private void plotPoint(BufferedImage image, Point2D.Double point, int colour) {
         Double locationX, locationY; // Location of point mapped to pixel co-ordinates
         Double percentX, percentY; // Percentage into image of pixel location
 
@@ -100,7 +112,7 @@ public class FieldInfo {
             yLoc = 0;
         }
 
-        fieldImage.setRGB((int) xLoc, (int) yLoc, colour); // Plot a point
+        image.setRGB((int) xLoc, (int) yLoc, colour); // Plot a point
     }
 
     // Plot a pixel at specified pixel location using Colour
@@ -297,7 +309,7 @@ public class FieldInfo {
 
                 if (index < 4) { // First 4 lines should be image corner co-ordinates
                     imageCorners.add(coordinate);
-                } else { // Remainder of lines should be coundary co-ordinates
+                } else { // Remainder of lines should be boundary co-ordinates
                     fieldBoundary.add(coordinate);
                 }
 

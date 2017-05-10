@@ -329,7 +329,7 @@
         <Component class="javax.swing.JCheckBox" name="chkInvertMask">
           <Properties>
             <Property name="text" type="java.lang.String" value="Invert mask (mask pixels in range)"/>
-            <Property name="toolTipText" type="java.lang.String" value="Inverts the mask effect, reveling what is under the mask"/>
+            <Property name="toolTipText" type="java.lang.String" value="Inverts the mask effect, revealing what is under the mask"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>

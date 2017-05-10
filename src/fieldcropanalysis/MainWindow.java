@@ -250,7 +250,6 @@ public class MainWindow extends javax.swing.JFrame {
 
         for (int y = 0; y < colourPalette.getHeight(); y++) {
             for (int x = 0; x < 360; x++) {
-                //colourPalette.setRGB(x, y, (Color.HSBtoRGB(1f/360f*(float)x, 0.75f, 0.75f).getRGB()).getRGB());
                 colourPalette.setRGB(x, y, Color.getHSBColor(1f / 360f * (float) x, 0.75f, 0.75f).getRGB());
             }
         }
@@ -586,7 +585,10 @@ public class MainWindow extends javax.swing.JFrame {
         if(applyNN) { // This is a destructive process changing workImage data
             workImageState = copyImage(workImage); // Backup the work image
             
-            workImage = fieldCropAnalysis.neuralNet(workImage, true); // true = Apply HSB Evaluation   
+            workImage = fieldCropAnalysis.neuralNet(workImage, true); // true = Apply HSB Evaluation 
+            field.plotBoundary(workImage); // Plot boundary pixels onto image
+            
+            
             
             // Redraw image
             displayImage(imageOriginX, imageOriginY);
@@ -791,7 +793,7 @@ public class MainWindow extends javax.swing.JFrame {
         });
 
         chkInvertMask.setText("Invert mask (mask pixels in range)");
-        chkInvertMask.setToolTipText("Inverts the mask effect, reveling what is under the mask");
+        chkInvertMask.setToolTipText("Inverts the mask effect, revealing what is under the mask");
         chkInvertMask.setEnabled(false);
         chkInvertMask.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
