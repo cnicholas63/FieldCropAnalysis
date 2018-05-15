@@ -10,15 +10,9 @@ package fieldcropanalysis;
 
 // Neuroph Dependencies
 import org.neuroph.core.NeuralNetwork;
-import org.neuroph.core.learning.SupervisedTrainingElement;
-import org.neuroph.core.learning.TrainingSet;
-import org.neuroph.nnet.MultiLayerPerceptron;
-import org.neuroph.util.TransferFunctionType;
-import org.neuroph.nnet.learning.BackPropagation;
 
 import java.awt.image.BufferedImage;
 import java.awt.Color;
-import java.awt.image.ColorModel;
 
 /**
  *
