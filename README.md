@@ -1,6 +1,6 @@
 # FieldCropAnalysis
 
-Part of my Master’s project. The aim was to develop a protoype which provides a gentle introduction into the analysis of remote sensed images. 
+developed in Java as part of my Master’s project. The aim was to develop a protoype which provides a gentle introduction into the analysis of remote sensed images. 
 
 Today, remote sensing often involves the analysis of images taken by satellite - usually outside of the visible spectrum. The acquisition and analysis of such images can be an expensive, time consuming and a technical process. This prototype, allows the investigation of a crop using the visible spectrum and images acquired via drone for example.
 
