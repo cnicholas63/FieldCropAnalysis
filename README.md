@@ -24,3 +24,8 @@ However, when applying the classifier, it correctly identifies these areas as fo
 Highlighted in green.
 
 Status line shows the mouse pixel coordinate and longitude/latitude over field.
+
+# Screen shots:
+Field no selection
+![alt text](https://github.com/cnicholas63/FieldCropAnalysis/blob/master/ScreenShots/FieldNoSelection.png "Field no selection")
+
