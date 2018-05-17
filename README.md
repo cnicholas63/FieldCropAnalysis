@@ -26,8 +26,18 @@ Highlighted in green.
 Status line shows the mouse pixel coordinate and longitude/latitude over field.
 
 # Screen shots:
-Field no selection
-<img width="240" src="https://github.com/cnicholas63/FieldCropAnalysis/blob/master/ScreenShots/FieldNoSelection.png" alt="Field no selection">
+Field no selection:
 
-![alt text](https://github.com/cnicholas63/FieldCropAnalysis/blob/master/ScreenShots/FieldNoSelection.png width="240" "Field no selection")
+<img width="400" src="https://github.com/cnicholas63/FieldCropAnalysis/blob/master/ScreenShots/FieldNoSelection.png" alt="Field no selection">
 
+Field with masked out selection:
+
+<img width="400" src="https://github.com/cnicholas63/FieldCropAnalysis/blob/master/ScreenShots/FieldWithSelection.png" alt="Field no selection">
+
+Field with classifier applied:
+
+<img width="400" src="https://github.com/cnicholas63/FieldCropAnalysis/blob/master/ScreenShots/FieldClassifierApplied.png" alt="Field no selection">
+
+Field with smoothed classifier applied:
+
+<img width="400" src="https://github.com/cnicholas63/FieldCropAnalysis/blob/master/ScreenShots/FieldClassifierSmoothed.png" alt="Field no selection">
