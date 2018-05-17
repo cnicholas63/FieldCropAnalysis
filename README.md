@@ -4,11 +4,11 @@ Developed in Java as part of my Master’s project. The aim was to develop a pro
 
 Today, remote sensing often involves the analysis of images taken by satellite - usually outside of the visible spectrum. The acquisition and analysis of such images can be an expensive, time consuming and a technical process. This prototype, allows the investigation of a crop using the visible spectrum and images acquired via drone for example.
 
-Provide an image with a set of GPS field boundary coordinates and the user can explore the field within the visible spectrum and with the ability to identify areas using gps coordinates. 
+Provide an image and a set of GPS field boundary coordinates and the user can explore the field within the visible spectrum, with the ability to identify areas using gps coordinates. 
 
-The user can highlight areas of interest, masked regions and has full control over the visible spectral range.
+The user can highlight areas of interest, mask regions and has full control over the visible spectral range.
 
-The system employs a neural network model(1), which when applied provides an automated analysis of the image categorising regions into one of three zones:
+The system employs a neural network model<sup>1</sup>, which when applied provides an automated analysis of the image categorising regions into one of three zones:
 
 * Green - 'healthy foliage'
 * Blue, 'Stressed areas'
@@ -48,4 +48,4 @@ Status line shows the mouse pixel coordinate and longitude/latitude over field.
   </tr>
 </table>
 
-(1) Neural network developed and trained using the Neuroph library: http://neuroph.sourceforge.net/
+<sup>1</sup> Neural network developed and trained using the Neuroph library: http://neuroph.sourceforge.net/
