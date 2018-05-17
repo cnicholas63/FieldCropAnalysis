@@ -27,5 +27,7 @@ Status line shows the mouse pixel coordinate and longitude/latitude over field.
 
 # Screen shots:
 Field no selection
+<img width="240" src="https://github.com/cnicholas63/FieldCropAnalysis/blob/master/ScreenShots/FieldNoSelection.png" alt="Field no selection">
+
 ![alt text](https://github.com/cnicholas63/FieldCropAnalysis/blob/master/ScreenShots/FieldNoSelection.png width="240" "Field no selection")
 
